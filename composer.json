@@ -1,0 +1,12 @@
+{
+  "name": "prexview/preview",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "stable",
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "PrexView\\": "src/"
+    }
+  }
+}
