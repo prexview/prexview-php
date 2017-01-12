@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /*
  * This file is part of the PrexView package.
  *
@@ -20,21 +20,27 @@ class PrexView
   /**
    * @var string
    */
-  const $token = getenv('PXV_API_KEY') || '';
+  const URL = 'https://api-beta.prexview.com/v1/';
 
   /**
    * @var string
    */
-  const $url = 'http://localhost:4000/v1/';
-  //const $url = 'https://api.prexview.com/v1/';
+  private $token;
+
+  /**
+    * Constructor
+    */
+  public function __construct() {
+    $this->token = getenv('PXV_API_KEY') || '';
+  }
 
   /**
    * Send the data to PrexView.
    *
    * @param Object $options
-   * @param Callback $cb
+   * @param String $file
    */
-  private static function send(Object $options, Callback $cb) {
+  private static function send(Object $options, String $file) {
 
   }
 
@@ -46,7 +52,7 @@ class PrexView
    * @throws \Exception If empty token
    */
   private static function checkToken() {
-    if ($token == '') throw new Exception("PrexView environment variable PXV_API_KEY must be set", 1);
+    if ($token == '') throw new \Exception("PrexView environment variable PXV_API_KEY must be set");
   }
 
   /**
@@ -56,7 +62,7 @@ class PrexView
    *
    * @return bool
    */
-  private static function isJson(String $str) : bool {
+  private static function isJson(String $str) {
     return true;
   }
 
@@ -70,7 +76,7 @@ class PrexView
    *
    * @return Object|string
    */
-  private static checkOptions(String $format, Object $options) {
+  private static function checkOptions($format, $options) {
     // JSON
     if ($format == 'json') {
       if (typeof($options->json) == 'String') {
@@ -90,13 +96,13 @@ class PrexView
     }
 
     if (typeof($options->design) != 'string')
-      return 'PrexView property "design" must be passed as a string option'
+      return 'PrexView property "design" must be passed as a string option';
 
     if (typeof($options->output) != 'string')
-      return 'PrexView property "output" must be passed as a string option'
+      return 'PrexView property "output" must be passed as a string option';
 
     if (['html','pdf','png','jpg'].indexOf($options->output) == -1)
-      return 'PrexView property "output" must be one of these options: html, pdf, png or jpg'
+      return 'PrexView property "output" must be one of these options: html, pdf, png or jpg';
 
     if ($options->designBackup && typeof($options->designBackup) != 'string')
       return 'PrexView property "designBackup" must be a string';
@@ -110,28 +116,28 @@ class PrexView
     return $options;
   }
 
-  public static sendXML(String $content, Object $options, Callback $cb) {
-    checkToken();
+  public static function sendXML($content, $options, $file) {
+    self::checkToken();
     $options->xml = $content;
 
-    const $result = checkOptions('xml', $options);
+    $result = checkOptions('xml', $options);
 
-    if (typeof($result) == 'String')
-      cb(new Exception($result));
+    if (typeof($result) == 'string')
+      throw new Exception($result);
     else
-      send($result, $cb);
+      send($result, $file);
   }
 
-  public static sendJSON(String $content, Object $options, Callback $cb) {
-    checkToken();
+  public static function sendJSON($content, $options, $file) {
+    self::checkToken();
     $options->json = $content;
 
-    const $result = checkOptions('json', $options);
+    $result = checkOptions('json', $options);
 
-    if (typeof($result) == 'String')
-      cb(new Exception($result));
+    if (typeof($result) == 'string')
+      throw new Exception($result);
     else
-      send($result, $cb);
+      send($result, $file);
   }
 
 }
