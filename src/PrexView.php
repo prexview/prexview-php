@@ -9,6 +9,8 @@
  */
 namespace PrexView;
 
+require __DIR__ . '/../vendor/autoload.php';
+
 /**
  * PrexView
  *
@@ -25,34 +27,51 @@ class PrexView
   /**
    * @var string
    */
-  private $token;
+  private $token = '';
 
   /**
     * Constructor
     */
-  public function __construct() {
-    $this->token = getenv('PXV_API_KEY') || '';
+  public function __construct($token = null) {
+    if (gettype($token) == 'string' && !empty($token)) {
+      $this->token = $token;
+    }
+
+    if (getenv('PXV_API_KEY')) {
+      $this->token = getenv('PXV_API_KEY');
+    }
   }
 
   /**
    * Send the data to PrexView.
    *
-   * @param Object $options
+   * @param Object $data
    * @param String $file
    */
-  private static function send(Object $options, String $file) {
+  private function send($data) {
+    $headers = array(
+      'Authorization' => $this->token
+    );
 
-  }
+    $response = \Requests::post(self::URL . 'transform', $headers, $data);
 
-  /**
-   * Validate the token.
-   *
-   * If there is not a token, will not send anything.
-   *
-   * @throws \Exception If empty token
-   */
-  private static function checkToken() {
-    if ($token == '') throw new \Exception("PrexView environment variable PXV_API_KEY must be set");
+    if (!$response->success) {
+      var_dump($response);
+      return null;
+    }
+
+    $result = new \stdClass();
+
+    $result->rateLimit = $response->headers['x-ratelimit-limit'];
+    $result->rateLimitReset = $response->headers['x-ratelimit-reset'];
+
+    if ($response->status_code === 200) {
+      $result->id = $response->headers['x-transaction-id'];
+      $result->file = $response->body;
+      $result->responseTime = $response->headers['x-response-time'];
+    }
+
+    return $result;
   }
 
   /**
@@ -62,8 +81,19 @@ class PrexView
    *
    * @return bool
    */
-  private static function isJson(String $str) {
-    return true;
+  private static function isJson($str) {
+    $valid = true;
+    $result = json_decode($str);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+      $valid = false;
+    }
+
+    if ($result === FALSE) {
+      $valid = false;
+    }
+
+    return $valid;
   }
 
   /**
@@ -78,37 +108,37 @@ class PrexView
    */
   private static function checkOptions($format, $options) {
     // JSON
-    if ($format == 'json') {
-      if (typeof($options->json) == 'String') {
-        if (!isJson($options->json)) {
-          return 'PrexView content must be a valid JSON string';
+    if ($format === 'json') {
+      if (gettype($options->json) === 'string') {
+        if (!self::isJson($options->json)) {
+          throw new \Exception('PrexView content must be a valid JSON string');
         }
       } else {
-        if ($options->json == null || typeof($options->json) != 'Object') {
-          return 'PrexView content must be a javascript object or a valid JSON string';
+        if ($options->json === null || gettype($options->json) !== 'object') {
+          throw new \Exception('PrexView content must be a javascript object or a valid JSON string');
         }
       }
     // XML
     } else {
-      if (typeof($options->xml) != 'string') {
-        return 'PrexView content must be a valid XML string';
+      if (gettype($options->xml) !== 'string') {
+        throw new \Exception('PrexView content must be a valid XML string');
       }
     }
 
-    if (typeof($options->design) != 'string')
-      return 'PrexView property "design" must be passed as a string option';
+    if (gettype($options->design) !== 'string')
+      throw new \Exception('PrexView property "design" must be passed as a string option');
 
-    if (typeof($options->output) != 'string')
-      return 'PrexView property "output" must be passed as a string option';
+    if (gettype($options->output) !== 'string')
+      throw new \Exception('PrexView property "output" must be passed as a string option');
 
-    if (['html','pdf','png','jpg'].indexOf($options->output) == -1)
-      return 'PrexView property "output" must be one of these options: html, pdf, png or jpg';
+    if (!in_array($options->output, ['html','pdf','png','jpg']))
+      throw new \Exception('PrexView property "output" must be one of these options: html, pdf, png or jpg');
 
-    if ($options->designBackup && typeof($options->designBackup) != 'string')
-      return 'PrexView property "designBackup" must be a string';
+    if ($options->designBackup && gettype($options->designBackup) !== 'string')
+      throw new \Exception('PrexView property "designBackup" must be a string');
 
-    if ($options->note && typeof($options->note) != 'string')
-      return 'PrexView property "note" must be a string';
+    if ($options->note && gettype($options->note) !== 'string')
+      throw new \Exception('PrexView property "note" must be a string');
 
     if ($options->note && strlen($options->note) > 500)
       $options->note = slice($options->note, 0, 500);
@@ -116,28 +146,35 @@ class PrexView
     return $options;
   }
 
-  public static function sendXML($content, $options, $file) {
-    self::checkToken();
-    $options->xml = $content;
-
-    $result = checkOptions('xml', $options);
-
-    if (typeof($result) == 'string')
-      throw new Exception($result);
-    else
-      send($result, $file);
+  /**
+   * Validate the token.
+   *
+   * If there is not a token, will not send anything.
+   *
+   * @throws \Exception If empty token
+   */
+  private static function checkToken($token) {
+    if ($token === '') throw new \Exception('PrexView environment variable PXV_API_KEY must be set');
   }
 
-  public static function sendJSON($content, $options, $file) {
-    self::checkToken();
+  public function sendXML($content, $options) {
+    self::checkToken($this->token);
+
+    $options->xml = $content;
+
+    $result = self::checkOptions('xml', $options);
+
+    return self::send($result);
+  }
+
+  public function sendJSON($content, $options) {
+    self::checkToken($this->token);
+
     $options->json = $content;
 
-    $result = checkOptions('json', $options);
+    $result = self::checkOptions('json', $options);
 
-    if (typeof($result) == 'string')
-      throw new Exception($result);
-    else
-      send($result, $file);
+    return self::send($result);
   }
 
 }

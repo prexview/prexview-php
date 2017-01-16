@@ -3,9 +3,11 @@
   "type": "library",
   "license": "MIT",
   "minimum-stability": "stable",
-  "require": {},
+  "require": {
+    "rmccue/requests": "^1.7"
+  },
   "autoload": {
-    "psr-4": {
+    "psr-0": {
       "PrexView\\": "src/"
     }
   }

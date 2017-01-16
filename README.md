@@ -10,7 +10,7 @@ A composer library to use PrexView a fast, scalable and very friendly service fo
 ## Install composer
 
 ```
-$ php composer.phar require prexview/prexview
+php composer.phar require prexview/prexview
 ```
 
 ## Install manually
@@ -27,76 +27,94 @@ git clone https://github.com/prexview/prexview-php.git vendor/prexview
 export PXV_API_KEY="API_KEY"
 ```
 
+If you can't setup the environment variable, create the PrexView object like this
+
+```php
+$pxv = new PrexView\PrexView('your_token_here');
+```
+
 You can sign up in [PrexView](https://prexview.com/join) in order to get an API Key.
+
+###### Include the library
+```php
+// Used for composer based installation
+require __DIR__  . '/vendor/autoload.php';
+// Use below for direct download installation
+// require __DIR__  . '/vender/prexview/src/PrexView.php';
+```
 
 ###### Sending XML
 
 ```php
-require __DIR__ . '/vendor/autoload.php';
-
 $pxv = new Prexview\Prexview();
 
-$options = {
-  design: 'custom-invoice',
-  output: 'pdf'
-}
+$options =  new stdClass();
 
-$xml = `<?xml version="1.0" encoding="UTF-8"?>
+$options->design = 'custom-invoice';
+$options->output = 'pdf';
+
+$xml = '<?xml version="1.0" encoding="UTF-8"?>
 <languages>
   <lang code="en">English</lang>
   <lang code="es">Español</lang>
   <lang code="fr">Française</lang>
-</languages>`
+</languages>';
 
-$pxv.sendXML(xml, options, (err, res)=>{
-  if(err) return console.log(err)
-  fs.writeFile('file.pdf', res.file, (err)=>{
-    console.log(`Completed with id ${res.id}`)
-  })
-})
+$file = '/tmp/test.pdf';
+
+try {
+  $res = $pxv->sendXML($xml, $options);
+
+  file_put_contents($file, $res->file);
+
+  echo 'File created: ' . $file;
+} catch (Exception $e) {
+  die($e->getMessage());
+}
 ```
 
 ###### Sending JSON
 
-You can pass the json param as a valid json string or as a  javascript object
+You can pass the json param as a valid json string or as a standard object
 
 ```php
-require __DIR__ . '/vendor/autoload.php';
-
 $pxv = new Prexview\Prexview();
 
-$options = {
-  design: 'custom-invoice',
-  output: 'pdf'
-}
+$options =  new stdClass();
 
-$json = `{
+$options->design = 'custom-invoice';
+$options->output = 'pdf';
+
+$json = '{
   "languages": {
     "en": "English",
     "es": "Español",
     "fr": "Française"
   }
-}`
+}';
 
-$pxv.sendJSON(json, options, (err, res)=>{
-  if(err) return console.log(err)
-  fs.writeFile('file.pdf', res.file, (err)=>{
-    console.log(`Completed with id ${res.id}`)
-  })
-})
+$file = '/tmp/test.pdf';
+
+try {
+  $res = $pxv->sendXML($xml, $options);
+
+  file_put_contents($file, $res->file);
+
+  echo 'File created: ' . $file;
+} catch (Exception $e) {
+  die($e->getMessage());
+}
 ```
-
-
 
 ## API
 
-### sendXML(xml, options, callback)
+### sendXML(xml, options)
 
 Send data as a XML string
 
-### sendJSON(json, options, callback)
+### sendJSON(json, options)
 
-Send data as a JSON string, it can also be can be a valid JSON string or a javascript object
+Send data as a JSON string, it can also be can be a valid JSON string or a standard object
 
 #### options
 
