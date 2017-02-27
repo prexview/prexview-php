@@ -22,7 +22,7 @@ class PrexView
   /**
    * @var string
    */
-  const URL = 'https://api-beta.prexview.com/v1/';
+  const URL = 'https://api.prexview.com/v1/';
 
   /**
    * @var string
