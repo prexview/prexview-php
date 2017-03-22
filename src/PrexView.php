@@ -64,6 +64,7 @@ class PrexView
 
     $result->rateLimit = $response->headers['x-ratelimit-limit'];
     $result->rateLimitReset = $response->headers['x-ratelimit-reset'];
+    $result->rateRemaining = $response->headers['x-ratelimit-remaining'];
 
     if ($response->status_code === 200) {
       $result->id = $response->headers['x-transaction-id'];
