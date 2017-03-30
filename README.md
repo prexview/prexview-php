@@ -33,7 +33,7 @@ If you can't setup the environment variable, create the PrexView object like thi
 $pxv = new PrexView\PrexView('your_token_here');
 ```
 
-You can sign up in [PrexView](https://prexview.com/join) in order to get an API Key.
+You can sign up in by downloading PrexView Studio from [PrexView](https://prexview.com) in order to get an API Key.
 
 ###### Include the library
 ```php
