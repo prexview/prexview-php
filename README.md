@@ -96,7 +96,7 @@ $json = '{
 $file = '/tmp/test.pdf';
 
 try {
-  $res = $pxv->sendXML($xml, $options);
+  $res = $pxv->sendJSON($json, $options);
 
   file_put_contents($file, $res->file);
 

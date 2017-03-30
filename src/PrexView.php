@@ -116,7 +116,7 @@ class PrexView
         }
       } else {
         if ($options->json === null || gettype($options->json) !== 'object') {
-          throw new \Exception('PrexView content must be a javascript object or a valid JSON string');
+          throw new \Exception('PrexView content must be a standard object or a valid JSON string');
         }
       }
     // XML
