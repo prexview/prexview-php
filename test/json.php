@@ -5,18 +5,18 @@ $pxv = new PrexView\PrexView();
 
 $options = new stdClass();
 
-$options->design = 'custom-invoice';
+$options->design = 'design-json';
 $options->output = 'pdf';
 
 $json = '{
-  "languages": {
-    "en": "English",
-    "es": "Español",
-    "fr": "Française"
-  }
+  "languages": [
+    {"code": "en", "name": "English"},
+    {"code": "es", "name": "Español"},
+    {"code": "fr", "name": "Française"}
+  ]
 }';
 
-$file = '/tmp/test.pdf';
+$file = 'test_json.pdf';
 
 try {
   $res = $pxv->sendJSON($json, $options);
