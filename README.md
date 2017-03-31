@@ -21,7 +21,7 @@ git clone https://github.com/prexview/prexview-php.git vendor/prexview
 
 ## Usage
 
-###### Set up the PXV_API_KEY as an enviroment variable
+###### Set up the PXV_API_KEY as an environment variable
 
 ```
 export PXV_API_KEY="API_KEY"
