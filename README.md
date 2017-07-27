@@ -2,55 +2,71 @@
 
 [![Status](https://travis-ci.org/prexview/prexview-php.svg?branch=master)](https://travis-ci.org/prexview/prexview-php)
 
-A composer library to use PrexView a fast, scalable and very friendly service for programatic HTML, PDF, PNG or JPG generation using JSON or XML data.
+A composer library to use [PrexView][1], a fast, scalable and friendly service for programatic HTML, PDF, PNG or JPG generation using JSON or XML data.
 
-*See [PrexView](https://prexview.com) for more information about the service.*
+*See [PrexView][1] for more information about the service.*
 
 
-## Install composer
+## Installation
+
+#### Composer
 
 ```
 php composer.phar require prexview/prexview
 ```
 
-## Install manually
+#### Manually
 
 ```
 git clone https://github.com/prexview/prexview-php.git vendor/prexview
 ```
 
-## Usage
+## Getting started
 
-###### Set up the PXV_API_KEY as an environment variable
+#### Get your API Key
+
+You can get an API Key from [PrexView][1]
+
+#### Set up your API Key
+
+If you can setup enviroment variables
 
 ```
-export PXV_API_KEY="API_KEY"
+export PXV_API_KEY="YOUR_API_KEY"
 ```
 
-If you can't setup the environment variable, create the PrexView object like this
+If you can't setup environment variables, create the PrexView object with your API Key as argument
 
 ```php
-$pxv = new PrexView\PrexView('your_token_here');
+$pxv = new PrexView\PrexView('YOUR_API_KEY');
 ```
 
-You can get an API Key by downloading PrexView Studio from [PrexView](https://prexview.com).
+#### Include the library
 
-###### Include the library
+##### Composer installation
+
 ```php
-// Used for composer based installation
 require __DIR__  . '/vendor/autoload.php';
-// Use below for direct download installation
-// require __DIR__  . '/vender/prexview/src/PrexView.php';
 ```
 
-###### Sending XML
+##### Manual installation
+
+```php
+require __DIR__  . '/vendor/prexview/src/PrexView.php';
+```
+
+#### Sending an XML
+
+To send an XML string use ```$pxv->sendXML($xml, $options)``` method, this method will return a [Response object][3] on success or thrown an error.
+
+##### Example
 
 ```php
 $pxv = new Prexview\Prexview();
 
 $options =  new stdClass();
 
-$options->design = 'custom-invoice';
+$options->template = 'supported_languages';
 $options->output = 'pdf';
 
 $xml = '<?xml version="1.0" encoding="UTF-8"?>
@@ -73,25 +89,36 @@ try {
 }
 ```
 
-###### Sending JSON
+#### Sending a JSON
 
-You can pass the json param as a valid json string or as a standard object
+To send a JSON string or PHP standard object use ```$pxv->sendJSON($json, $options)``` method, this method will return a [Response object][3] on success or thrown an error.
+
+##### Example
 
 ```php
 $pxv = new Prexview\Prexview();
 
 $options =  new stdClass();
 
-$options->design = 'custom-invoice';
+$options->template = 'supported_languages';
 $options->output = 'pdf';
 
-$json = '{
-  "languages": [
-    {"code": "en", "name": "English"},
-    {"code": "es", "name": "Español"},
-    {"code": "fr", "name": "Française"}
-  ]
-}';
+$json = new StdClass();
+
+$en = new StdClass();
+$es = new StdClass();
+$fr = new StdClass();
+
+$en->code = 'en';
+$en->name = 'English';
+
+$es->code = 'es';
+$es->name = 'Español';
+
+$fr->code = 'fr';
+$fr->name = 'Française';
+
+$json->languages = [$en, $es, $fr];
 
 $file = 'test.pdf';
 
@@ -106,31 +133,31 @@ try {
 }
 ```
 
-## API
+##### Response object
 
-### sendXML(xml, options)
+|Property|Type|Description|
+|--------|:--:|-----------|
+|id|`string`|Transaction ID.|
+|file|`binary`|Document created by the service.|
+|responseTime|`int`|Response time from service.|
+|rateLimit|`int`|Maximum number of calls to the service.|
+|rateLimitReset|`int`|Seconds to reset the rate limit.|
+|rateRemaining|`int`|Number of remaining call to the service.|
 
-Send data as a XML string
+##### Options
 
-### sendJSON(json, options)
+|Name|Type|Required|Description|
+|----|:--:|:------:|-----------|
+|template|`string`|Yes|Template's name to be used to document creation, you can use [dynamic values][2].|
+|output|`string`|Yes|Type of document that will be created by PrexView service, it must be **html**, **pdf**, **png** or **jpg**.|
+|note|`string`|No|Custom information to be added to the document's metadata, it's limit up to 500 characters and you can use [dynamic values][2].|
+|format|`string`|No|Type of data used to the document creation, it must be **xml** or **json**, this should be inferred from library methods.|
+|templateBackup|`string`|No|Template's name to use to be used if the option **template** is not available in the service.|
 
-Send data as a JSON string, it can also be can be a valid JSON string or a standard object
+##### Dynamic values
 
-#### Options
+In **template** or **note** options you can use JSON sintax to access data and have dynamic values, for instance having the following JSON data:
 
-##### -\-format
-
-###### Type: `string` **Required: Yes**
-
-Data to use for the document creation, must be xml or json.
-
-##### -\-design
-
-###### Type: `string` **Required: Yes**
-
-Design's name to use.
-
-You can use json sintax here to access data and have dynamic design names
 ```json
 {
   "Data": {
@@ -138,56 +165,25 @@ You can use json sintax here to access data and have dynamic design names
   }
 }
 ```
-Design name can use any data attribute or text node
+
+Your **template** or **note** can use any data attribute or text node, for instance:
+
 ```
-invoice-customer-{{Data.customer}}
-```
-We will translate that to the following
-```
-invoice-customer-123
+'invoice-customer-{{Data.customer}}'
 ```
 
-And finally the service will try to find the design **invoice-customer-123** in order to transform the data and generate the document.
-  
-##### -\-output
+Then we will translate that to the following:
 
-###### Type: `string` **Required: Yes**
-
-Document response type from the service, it can be **html**, **pdf**, **png** or **jpg**.
-
-##### -\-design-backup
-
-###### Type: `string`
-
-Design's name to use to be used if the option **design** is not available in the service.
-
-##### -\-note
-
-###### Type: `string`
-
-Custom note that can be used to add any information, it's limit up to 500 chars. This is useful if you want to add metadata such as document, transaction or customer ID.
-
-You can use json syntax to access data and get dynamic notes. 
-  
-```json
-{
-  "Data": {
-    "customer": "123"
-  }
-}
 ```
-Notes can use any data attribute or text
-```
-Document: Invoice
-Customer: {{Data.customer}}
-```
-We will translate that to the following
-```
-Document: Invoice
-Customer: 123
+'invoice-customer-123'
 ```
 
+And finally the service will try to find the **template** or **note** ```invoice-customer-123``` in order to transform the data and generate the document.
 
 ## License
 
-MIT © [PrexView](https://prexview.com)
+MIT © [PrexView][1]
+
+[1]: https://prexview.com
+[2]: #dynamic-values
+[3]: #response-object
