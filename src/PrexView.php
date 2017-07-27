@@ -9,8 +9,6 @@
  */
 namespace PrexView;
 
-require __DIR__ . '/../vendor/autoload.php';
-
 /**
  * PrexView
  *

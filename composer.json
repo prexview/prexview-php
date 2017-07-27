@@ -1,13 +1,14 @@
 {
   "name": "prexview/prexview",
   "type": "library",
+  "description": "",
   "license": "MIT",
   "minimum-stability": "stable",
   "require": {
     "rmccue/requests": "^1.7"
   },
   "autoload": {
-    "psr-0": {
+    "psr-4": {
       "PrexView\\": "src/"
     }
   }
