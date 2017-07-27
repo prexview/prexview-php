@@ -8,13 +8,22 @@ $options = new stdClass();
 $options->design = 'design-json';
 $options->output = 'pdf';
 
-$json = '{
-  "languages": [
-    {"code": "en", "name": "English"},
-    {"code": "es", "name": "Español"},
-    {"code": "fr", "name": "Française"}
-  ]
-}';
+$json = new StdClass();
+
+$en = new StdClass();
+$es = new StdClass();
+$fr = new StdClass();
+
+$en->code = 'en';
+$en->name = 'English';
+
+$es->code = 'es';
+$es->name = 'Español';
+
+$fr->code = 'fr';
+$fr->name = 'Française';
+
+$json->languages = [$en, $es, $fr];
 
 $file = 'test_json.pdf';
 

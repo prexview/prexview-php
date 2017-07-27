@@ -56,8 +56,7 @@ class PrexView
     $response = \Requests::post(self::URL . 'transform', $headers, $data);
 
     if (!$response->success) {
-      var_dump($response);
-      return null;
+      throw new \Exception('PrexView could not create document, response status: ' . $response->status_code);
     }
 
     $result = new \stdClass();
@@ -117,6 +116,8 @@ class PrexView
       } else {
         if ($options->json === null || gettype($options->json) !== 'object') {
           throw new \Exception('PrexView content must be a standard object or a valid JSON string');
+        } else {
+          $options->json = json_encode($options->json);
         }
       }
     // XML
@@ -126,8 +127,15 @@ class PrexView
       }
     }
 
-    if (gettype($options->design) !== 'string')
-      throw new \Exception('PrexView property "design" must be passed as a string option');
+    // TODO: design option is deprecated, this should be removed
+    if ($options->design) {
+      echo "PrexView property 'design' is deprecated, please use 'template' property.\n";
+      $options->template = $options->design;
+      unset($options->design);
+    }
+
+    if (gettype($options->template) !== 'string')
+      throw new \Exception('PrexView property "template" must be passed as a string option');
 
     if (gettype($options->output) !== 'string')
       throw new \Exception('PrexView property "output" must be passed as a string option');
@@ -135,8 +143,15 @@ class PrexView
     if (!in_array($options->output, ['html','pdf','png','jpg']))
       throw new \Exception('PrexView property "output" must be one of these options: html, pdf, png or jpg');
 
-    if ($options->designBackup && gettype($options->designBackup) !== 'string')
-      throw new \Exception('PrexView property "designBackup" must be a string');
+    // TODO: designBackup options is deprecated, this should be removed
+    if ($options->designBackup) {
+      echo "PrexView property 'designBackup' is deprecated, please use 'templateBackup' property.\n";
+      $options->templateBackup = $options->designBackup;
+      unset($options->designBackup);
+    }
+
+    if ($options->templateBackup && gettype($options->templateBackup) !== 'string')
+      throw new \Exception('PrexView property "templateBackup" must be a string');
 
     if ($options->note && gettype($options->note) !== 'string')
       throw new \Exception('PrexView property "note" must be a string');
