@@ -1,7 +1,7 @@
 {
   "name": "prexview/prexview",
   "type": "library",
-  "description": "",
+  "description": "A composer library to use PrexView, a fast, scalable and friendly service for programatic HTML, PDF, PNG or JPG generation using JSON or XML data.",
   "license": "MIT",
   "minimum-stability": "stable",
   "require": {
